@@ -1,0 +1,12 @@
+{
+    "mongoDB": {
+        "host": "",
+        "port": "",
+        "username": "",
+        "password": "",
+        "database": "",
+        "authSource": "",
+        "xpCollectionName": ""
+    },
+    "port": 4500
+}
