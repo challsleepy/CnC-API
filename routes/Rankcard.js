@@ -21,7 +21,6 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 }
 
 router.get('/rankCardGif', async (req, res) => {
-    console.log(req.query)
     // Get the background gif name that the client wants to get
     const { avatarURL, xp, level, progressBarColor, background, rank } = req.query;
 
@@ -66,7 +65,6 @@ router.get('/rankCardGif', async (req, res) => {
     for (frame of frames) {
         const framePath = `${__dirname}/../assets/rankCardBGs/${background}/${frame}`;
         const frameImage = await canvas.loadImage(framePath);
-        console.log(framePath)
 
         const cv = canvas.createCanvas(width, height);
         const ctx = cv.getContext('2d');
