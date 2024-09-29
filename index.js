@@ -7,7 +7,7 @@ const config = require('./config.json');
 
 app.use(cors(
     {
-        origin: 'https://ranks.codenchill.org',
+        origin: config.cors.allowedOrigins,
         optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
     }
 ));
@@ -24,6 +24,7 @@ app.use(function (req, res, next) {
 
 // Import Routes
 const XPSystemRoute = require('./routes/XPSystem');
+const rankCardRoute = require('./routes/Rankcard');
 
 // Middlewares
 app.use(bodyParser.urlencoded({
@@ -33,6 +34,7 @@ app.use(bodyParser.urlencoded({
 
 // Route Middlewares
 app.use('/xp-system', XPSystemRoute);
+app.use('/rankcard', rankCardRoute);
 
 app.set('trust proxy', true)
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -40,5 +42,5 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect(`mongodb://${config.mongoDB.username}:${config.mongoDB.password}@${config.mongoDB.host}:${config.mongoDB.port}/${config.mongoDB.database}?authSource=${config.mongoDB.authSource}`)
 	.then(() => {
 		app.listen(config.port);
-		console.log('Connected to database and listening on port 4500')
+		console.log(`Connected to database and listening on port ${config.port}`)
 	});
