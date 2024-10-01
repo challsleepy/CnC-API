@@ -196,10 +196,12 @@ router.get('/rankCardGif', async (req, res) => {
             return res.send(gifBuffer.toString('base64')).status(200);
         });
 
+        const gifConfig = require(`${__dirname}/../assets/rankCardBGs/${background}/config.json`);
+
         // Start the encoder
         encoder.start();
         encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
-        encoder.setDelay(200);   // Frame delay in ms
+        encoder.setDelay(gifConfig.delay);   // Frame delay in ms
         encoder.setQuality(10); // Image quality, 10 is default    
 
         const frames = fs.readdirSync(`${__dirname}/../assets/rankCardBGs/${background}`).filter(file => file.endsWith('.png'));
