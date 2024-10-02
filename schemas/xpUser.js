@@ -5,9 +5,19 @@ const xpUser = new mongoose.Schema({
     _id: String,
     current_xp: Number,
     current_level: Number,
-    mow_points: Number,
-    voted: Boolean,
-    votes: Number
-})
+    mowPoints: Number,
+    votesLeft: Number,
+    votes: Number,
+    votedMembers: Array,
+    displayHex: String,
+    displayURL: String,
+    displayName: String,
+    rankCard: {
+        progressBarColor: String,
+        background: String,
+        unlockedBackgrounds: Array,
+        candyColor: String
+    }
+});
 
 module.exports = mongoose.model('XPUser', xpUser, config.mongoDB.xpCollectionName);

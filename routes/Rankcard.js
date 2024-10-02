@@ -152,85 +152,146 @@ const generateRankCard = async (avatarURL, xp, level, progressBarColor, backgrou
 }
 
 router.get('/rankCardGif', async (req, res) => {
-    console.log('Request received', req.query, req.body, req.params);
-    // Get the background gif name that the client wants to get
-    const { avatarURL, xp, level, progressBarColor, background, rank } = req.query;
+    try {
+        console.log('Request received', req.query, req.body, req.params);
+        // Get the background gif name that the client wants to get
+        const { avatarURL, xp, level, progressBarColor, background, rank } = req.query;
 
-    // Check if any of the required parameters are missing
-    if (!avatarURL || !xp || !level || !progressBarColor || !background || !rank) return res.status(400).send('Missing parameters');
+        // Check if any of the required parameters are missing
+        if (!avatarURL || !xp || !level || !progressBarColor || !background || !rank) return res.status(400).send('Missing parameters');
 
-    const candyImages = ['purple-candy.png', 'cyan-candy.png', 'yellow-candy.png', 'pink-candy.png', 'blue-candy.png'];
-    const randomIndex = Math.floor(Math.random() * candyImages.length);
-    const candyImagePath = `${__dirname}/../assets/candies/${candyImages[randomIndex]}`;
-    const candyImage = await canvas.loadImage(candyImagePath);
-    const width = 200;
-    const height = 200;
+        const candyImages = ['purple-candy.png', 'cyan-candy.png', 'yellow-candy.png', 'pink-candy.png', 'blue-candy.png'];
+        const randomIndex = Math.floor(Math.random() * candyImages.length);
+        const candyImagePath = `${__dirname}/../assets/candies/${candyImages[randomIndex]}`;
+        const candyImage = await canvas.loadImage(candyImagePath);
+        const width = 200;
+        const height = 200;
 
-    // If bg is hexcode
-    if (background.startsWith('#')) {
-        const buffer = await generateRankCard(avatarURL, xp, level, progressBarColor, background, rank, candyImage);
-        return res.send(buffer.toString('base64')).status(200);
-    }
-
-    // If bg is img url
-    if (background.startsWith('http')) {
-        const buffer = await generateRankCard(avatarURL, xp, level, progressBarColor, background, rank, candyImage);
-        return res.send(buffer.toString('base64')).status(200);
-    }
-
-    // If bg is folder name (gif)
-    if (fs.existsSync(`${__dirname}/../assets/rankCardBGs/${background}`)) {
-        // Create a new GIF encoder instance
-        const encoder = new GIFEncoder(width, height);
-
-        // Create an array to collect the data chunks
-        let chunks = [];
-
-        // Set up the event listeners on the encoder's output stream
-        encoder.createReadStream().on('data', function (chunk) {
-            chunks.push(chunk);
-        }).on('end', function () {
-            // Combine the chunks into a single Buffer
-            console.log
-            const gifBuffer = Buffer.concat(chunks);
-            return res.send(gifBuffer.toString('base64')).status(200);
-        });
-
-        const gifConfig = require(`${__dirname}/../assets/rankCardBGs/${background}/config.json`);
-
-        // Start the encoder
-        encoder.start();
-        encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
-        encoder.setDelay(gifConfig.delay);   // Frame delay in ms
-        encoder.setQuality(10); // Image quality, 10 is default    
-
-        const frames = fs.readdirSync(`${__dirname}/../assets/rankCardBGs/${background}`).filter(file => file.endsWith('.png'));
-        frames.sort((a, b) => {
-            const aNum = parseInt(a.split('-')[1].split('.')[0]);
-            const bNum = parseInt(b.split('-')[1].split('.')[0]);
-            return aNum - bNum;
-        });
-
-        for (frame of frames) {
-            const ctx = await generateRankCard(avatarURL, xp, level, progressBarColor, `${__dirname}/../assets/rankCardBGs/${background}/${frame}`, rank, candyImage);
-            encoder.addFrame(ctx);
+        // If bg is hexcode
+        if (background.startsWith('#')) {
+            const buffer = await generateRankCard(avatarURL, xp, level, progressBarColor, background, rank, candyImage);
+            return res.send(buffer.toString('base64')).status(200);
         }
 
-        encoder.finish();
-    } else {
-        return res.status(400).send('Invalid background');
+        // If bg is img url
+        if (background.startsWith('http')) {
+            const buffer = await generateRankCard(avatarURL, xp, level, progressBarColor, background, rank, candyImage);
+            return res.send(buffer.toString('base64')).status(200);
+        }
+
+        // If bg is folder name (gif)
+        if (fs.existsSync(`${__dirname}/../assets/rankCardBGs/${background}`)) {
+            // Create a new GIF encoder instance
+            const encoder = new GIFEncoder(width, height);
+
+            // Create an array to collect the data chunks
+            let chunks = [];
+
+            // Set up the event listeners on the encoder's output stream
+            encoder.createReadStream().on('data', function (chunk) {
+                chunks.push(chunk);
+            }).on('end', function () {
+                // Combine the chunks into a single Buffer
+                console.log
+                const gifBuffer = Buffer.concat(chunks);
+                return res.send(gifBuffer.toString('base64')).status(200);
+            });
+
+            const gifConfig = require(`${__dirname}/../assets/rankCardBGs/${background}/config.json`);
+
+            // Start the encoder
+            encoder.start();
+            encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
+            encoder.setDelay(gifConfig.delay);   // Frame delay in ms
+            encoder.setQuality(10); // Image quality, 10 is default    
+
+            const frames = fs.readdirSync(`${__dirname}/../assets/rankCardBGs/${background}`).filter(file => file.endsWith('.png'));
+            frames.sort((a, b) => {
+                const aNum = parseInt(a.split('-')[1].split('.')[0]);
+                const bNum = parseInt(b.split('-')[1].split('.')[0]);
+                return aNum - bNum;
+            });
+
+            for (frame of frames) {
+                const ctx = await generateRankCard(avatarURL, xp, level, progressBarColor, `${__dirname}/../assets/rankCardBGs/${background}/${frame}`, rank, candyImage);
+                encoder.addFrame(ctx);
+            }
+
+            encoder.finish();
+        } else {
+            return res.status(400).send('Invalid background');
+        }
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ error: 'Internal server error' });
     }
 });
 
 router.get('/getEditorSession', async (req, res) => {
-    const { sessionId } = req.query;
-    console.log(sessionId)
-    if (!sessionId) return res.status(400);
+    try {
+        const { sessionId } = req.query;
+        console.log(sessionId)
+        if (!sessionId) return res.status(400);
 
-    const session = await editorSession.findById(sessionId);
-    if (!session) return res.status(404);
+        const session = await editorSession.findById(sessionId);
+        if (!session) return res.status(404);
 
-    return res.send(session).status(200);
+        return res.send(session).status(200);
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send({ error: 'Internal server error' });
+    }
+})
+
+router.post('/saveRankCard', async (req, res) => {
+    try {
+        const { sessionId, rankCardData } = req.query;
+        if (!sessionId || !rankCardData) return res.status(400);
+        console.log(sessionId, rankCardData)
+
+        let rankCardDataJSON;
+        try {
+            rankCardDataJSON = JSON.parse(rankCardData);
+        } catch (error) {
+            return res.status(400).send({ error: 'Invalid JSON format' });
+        }
+
+        console.log(rankCardDataJSON);
+
+        const session = await editorSession.findById(sessionId);
+        if (!session) return res.status(404);
+        console.log("valid session")
+
+        const user = await xpUser.findById(`${session.user_id}_1249002261955219456`);
+        if (!user) return res.status(404);
+        console.log("valid user")
+
+        // Validity checks. Check if strings are empty. Check if progressbar hex, background hex are actually hex codes. If background is not hex code, then check if user has unlocked that background
+        if (!rankCardDataJSON.progressBarColor || !rankCardDataJSON.background) return res.status(400).send('Missing parameters');
+        console.log("valid params")
+
+        if (!/^#[0-9A-F]{6}$/i.test(rankCardDataJSON.progressBarColor)) return res.status(400).send('Invalid progress bar color');
+        console.log("valid progress bar color")
+        if (!/^#[0-9A-F]{6}$/i.test(rankCardDataJSON.background)) {
+            if (!rankCardDataJSON.background.startsWith('#')) {
+                if (!user.rankCard.unlockedBackgrounds.includes(rankCardDataJSON.background)) return res.status(403).send('Background not unlocked');
+            }
+        }
+        console.log("valid background")
+
+        // Update user rank card data
+        user.rankCard.progressBarColor = rankCardDataJSON.progressBarColor;
+        user.rankCard.background = rankCardDataJSON.background;
+        user.rankCard.unlockedBackgrounds = rankCardDataJSON.unlockedBackgrounds;
+
+        await user.save();
+        session.rankCardData = rankCardDataJSON;
+        await session.save();
+        return res.status(200).send({ message: 'Rank card data processed successfully' });
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send({ error: 'Internal server error' });
+    }
 })
 
 module.exports = router;
