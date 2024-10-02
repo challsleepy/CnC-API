@@ -262,7 +262,7 @@ router.post('/saveRankCard', async (req, res) => {
         if (!session) return res.status(404);
         console.log("valid session")
 
-        const user = await xpUser.findById(`${session.user_id}_1249002261955219456`);
+        const user = await xpUser.findById(`${session.user_id}_1258818895901626468`);
         if (!user) return res.status(404);
         console.log("valid user")
 
