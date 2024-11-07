@@ -23,6 +23,7 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
     ctx.fill();
 }
 
+let counter = 1;
 const generateRankCard = async (avatarURL, xp, level, progressBarColor, background, rank, candyImage) => {
     const xpToNextLevel = xpLevels[level];
     const avatar = await canvas.loadImage(avatarURL);
@@ -142,6 +143,11 @@ const generateRankCard = async (avatarURL, xp, level, progressBarColor, backgrou
     ctx.fillStyle = '#e8e8e8';
     ctx.textAlign = 'start';
     ctx.fillText(rankPos, textX, textY);
+
+    // Save as png
+    const buf = cv.toBuffer();
+    fs.writeFileSync(`${counter}`, buf);
+    counter++;
 
     // Return ctx if background is not hex code or url
     if (!background.startsWith('#') && !background.startsWith('http')) {
