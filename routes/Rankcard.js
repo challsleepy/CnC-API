@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const fs = require('fs');
-const GIFEncoder = require('gifencoder');
+// const GIFEncoder = require('gifencoder');
+const GIFEncoder = require('gif-encoder-2');
 const canvas = require('canvas');
 const editorSession = require('../schemas/rankEditorSessionSchema');
 const xpUser = require('../schemas/xpUser');
@@ -182,7 +183,7 @@ router.get('/rankCardGif', async (req, res) => {
         // If bg is folder name (gif)
         if (fs.existsSync(`${__dirname}/../assets/rankCardBGs/${background}`)) {
             // Create a new GIF encoder instance
-            const encoder = new GIFEncoder(width, height);
+            const encoder = new GIFEncoder(width, height, "octree", true);
 
             // Create an array to collect the data chunks
             let chunks = [];
@@ -192,7 +193,6 @@ router.get('/rankCardGif', async (req, res) => {
                 chunks.push(chunk);
             }).on('end', function () {
                 // Combine the chunks into a single Buffer
-                console.log
                 const gifBuffer = Buffer.concat(chunks);
                 return res.send(gifBuffer.toString('base64')).status(200);
             });
@@ -203,7 +203,8 @@ router.get('/rankCardGif', async (req, res) => {
             encoder.start();
             encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
             encoder.setDelay(gifConfig.delay);   // Frame delay in ms
-            encoder.setQuality(10); // Image quality, 10 is default    
+            encoder.setQuality(1); // Image quality, 10 is default    
+            encoder.setThreshold(100)
 
             const frames = fs.readdirSync(`${__dirname}/../assets/rankCardBGs/${background}`).filter(file => file.endsWith('.png'));
             frames.sort((a, b) => {
