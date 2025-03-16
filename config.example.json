@@ -1,16 +1,19 @@
 {
-    "cors": {
-        "allowedOrigins": []
-    },
-    "mongoDB": {
-        "host": "",
-        "port": "",
-        "username": "",
-        "password": "",
-        "database": "",
-        "authSource": "",
-        "xpCollectionName": "",
-        "editorSessionsCollectionName": ""
-    },
-    "port": 4500
+  "cors": {
+    "allowedOrigins": []
+  },
+  "discord": {
+    "guildId": ""
+  },
+  "mongoDB": {
+    "host": "",
+    "port": "",
+    "username": "",
+    "password": "",
+    "database": "",
+    "authSource": "",
+    "xpCollectionName": "",
+    "editorSessionsCollectionName": ""
+  },
+  "port": 4500
 }
